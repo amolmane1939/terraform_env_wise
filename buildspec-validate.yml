@@ -1,0 +1,51 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing Terraform..."
+      - wget https://releases.hashicorp.com/terraform/1.6.0/terraform_1.6.0_linux_amd64.zip
+      - unzip terraform_1.6.0_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+      - terraform --version
+      - echo "Installing additional tools..."
+      - apt-get update && apt-get install -y jq
+
+  pre_build:
+    commands:
+      - echo "Starting Terraform validation..."
+      - echo "Current directory contents:"
+      - ls -la
+
+  build:
+    commands:
+      - echo "=== TERRAFORM FORMAT CHECK ==="
+      - terraform fmt -check -recursive
+      - echo "=== TERRAFORM VALIDATION - DEV ==="
+      - cd environments/dev
+      - terraform init -backend=false
+      - terraform validate
+      - terraform plan -var-file=terraform.tfvars
+      - cd ../..
+      - echo "=== TERRAFORM VALIDATION - STAGE ==="
+      - cd environments/stage
+      - terraform init -backend=false
+      - terraform validate
+      - terraform plan -var-file=terraform.tfvars
+      - cd ../..
+      - echo "=== TERRAFORM VALIDATION - PROD ==="
+      - cd environments/prod
+      - terraform init -backend=false
+      - terraform validate
+      - terraform plan -var-file=terraform.tfvars
+      - cd ../..
+
+  post_build:
+    commands:
+      - echo "Terraform validation completed successfully!"
+
+artifacts:
+  files:
+    - '**/*'

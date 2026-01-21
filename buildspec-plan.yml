@@ -1,0 +1,41 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing Terraform..."
+      - wget https://releases.hashicorp.com/terraform/1.6.0/terraform_1.6.0_linux_amd64.zip
+      - unzip terraform_1.6.0_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+      - terraform --version
+
+  pre_build:
+    commands:
+      - echo "Starting Terraform planning for environment: $TF_VAR_environment"
+      - echo "AWS Region: $AWS_DEFAULT_REGION"
+      - cd environments/$TF_VAR_environment
+
+  build:
+    commands:
+      - echo "=== TERRAFORM INIT ==="
+      - terraform init
+      - echo "=== TERRAFORM PLAN ==="
+      - terraform plan -var-file=terraform.tfvars -out=tfplan
+      - echo "=== TERRAFORM SHOW PLAN ==="
+      - terraform show -no-color tfplan > plan-output.txt
+      - echo "Plan saved to plan-output.txt"
+
+  post_build:
+    commands:
+      - echo "Terraform planning completed for $TF_VAR_environment environment"
+      - echo "Plan summary:"
+      - grep -E "(Plan:|No changes)" plan-output.txt || echo "Plan details in artifacts"
+
+artifacts:
+  files:
+    - environments/$TF_VAR_environment/tfplan
+    - environments/$TF_VAR_environment/plan-output.txt
+    - environments/$TF_VAR_environment/.terraform.lock.hcl
+  name: terraform-plan-$TF_VAR_environment

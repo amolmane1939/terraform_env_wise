@@ -1,0 +1,49 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing Terraform..."
+      - wget https://releases.hashicorp.com/terraform/1.6.0/terraform_1.6.0_linux_amd64.zip
+      - unzip terraform_1.6.0_linux_amd64.zip
+      - mv terraform /usr/local/bin/
+      - terraform --version
+
+  pre_build:
+    commands:
+      - echo "Starting Terraform deployment for environment: $TF_VAR_environment"
+      - echo "AWS Region: $AWS_DEFAULT_REGION"
+      - cd environments/$TF_VAR_environment
+
+  build:
+    commands:
+      - echo "=== TERRAFORM INIT ==="
+      - terraform init
+      - echo "=== TERRAFORM PLAN ==="
+      - terraform plan -var-file=terraform.tfvars
+      - echo "=== TERRAFORM APPLY ==="
+      - terraform apply -var-file=terraform.tfvars -auto-approve
+      - echo "=== TERRAFORM OUTPUT ==="
+      - terraform output -json > terraform-outputs.json
+      - terraform output
+
+  post_build:
+    commands:
+      - echo "Terraform deployment completed for $TF_VAR_environment environment"
+      - echo "Infrastructure outputs:"
+      - cat terraform-outputs.json
+      - echo "Deployment successful!"
+
+artifacts:
+  files:
+    - environments/$TF_VAR_environment/terraform-outputs.json
+    - environments/$TF_VAR_environment/.terraform.lock.hcl
+  name: terraform-apply-$TF_VAR_environment
+
+reports:
+  terraform-report:
+    files:
+      - environments/$TF_VAR_environment/terraform-outputs.json
+    file-format: 'JSON'
