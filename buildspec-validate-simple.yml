@@ -31,6 +31,8 @@ phases:
 
   build:
     commands:
+      - echo "=== runnung terraform init ===="
+      - terraform init 
       - echo "=== TERRAFORM FORMAT CHECK ==="
       - echo "Checking and fixing Terraform file formatting..."
       - terraform fmt -recursive
