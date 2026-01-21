@@ -39,19 +39,19 @@ phases:
       - echo "✅ Terraform formatting completed"
       - echo "=== TERRAFORM VALIDATION - DEV ==="
       - cd environments/dev
-      - terraform init -backend=false -input=false
+      - terraform init -input=false
       - terraform validate
       - terraform plan -var-file=terraform.tfvars -input=false
       - cd ../..
       - echo "=== TERRAFORM VALIDATION - STAGE ==="
       - cd environments/stage
-      - terraform init -backend=false -input=false
+      - terraform init -input=false
       - terraform validate
       - terraform plan -var-file=terraform.tfvars -input=false
       - cd ../..
       - echo "=== TERRAFORM VALIDATION - PROD ==="
       - cd environments/prod
-      - terraform init -backend=false -input=false
+      - terraform init -input=false
       - terraform validate
       - terraform plan -var-file=terraform.tfvars -input=false
       - cd ../..
