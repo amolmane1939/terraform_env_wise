@@ -17,11 +17,16 @@ phases:
 
   pre_build:
     commands:
+<<<<<<< HEAD
       - echo "Build started on"
       - echo "Starting Terraform planning for environment:"
       - echo $TF_VAR_environment
       - echo "AWS Region:"
       - echo $AWS_DEFAULT_REGION
+=======
+      - echo "Starting Terraform planning for environment:"
+      - echo "AWS Region:"
+>>>>>>> a220eab7f7bf3cfc647f4a2791d5456f3d01d2b2
       - cd environments/$TF_VAR_environment
 
   build:
@@ -42,7 +47,7 @@ phases:
 
 artifacts:
   files:
-    - environments/$TF_VAR_environment/tfplan
-    - environments/$TF_VAR_environment/plan-output.txt
-    - environments/$TF_VAR_environment/.terraform.lock.hcl
-  name: terraform-plan-$TF_VAR_environment
+    - 'environments/$TF_VAR_environment/tfplan'
+    - 'environments/$TF_VAR_environment/plan-output.txt'
+    - 'environments/$TF_VAR_environment/.terraform.lock.hcl'
+  name: 'terraform-plan-$TF_VAR_environment'
