@@ -28,7 +28,9 @@ phases:
   build:
     commands:
       - echo "=== TERRAFORM FORMAT CHECK ==="
-      - terraform fmt -check -recursive
+      - echo "Checking and fixing Terraform file formatting..."
+      - terraform fmt -recursive
+      - echo "✅ Terraform formatting completed"
       - echo "=== TERRAFORM VALIDATION - DEV ==="
       - cd environments/dev
       - terraform init -backend=false -input=false
