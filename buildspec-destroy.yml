@@ -14,8 +14,6 @@ phases:
       - apt-get update
       - apt-get install -y terraform
       - terraform --version
-      - echo "Installing additional tools..."
-      - apt-get install -y jq
 
   pre_build:
     commands:
@@ -27,7 +25,7 @@ phases:
   build:
     commands:
       - echo "=== TERRAFORM INIT ==="
-      - terraform init
+      - terraform init -input=false
       - echo "=== TERRAFORM PLAN DESTROY ==="
       - terraform plan -destroy -var-file=terraform.tfvars
       - echo "=== TERRAFORM DESTROY ==="
