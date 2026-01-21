@@ -1,6 +1,6 @@
 provider "aws" {
   region = var.region
-  
+
   default_tags {
     tags = {
       Environment = "stage"
@@ -21,18 +21,18 @@ terraform {
 
 
 module "networking" {
-  source = "../../modules/networking"
-  region = var.region
-  vpc_cidr = var.vpc_cidr
-  vpc_name = var.vpc_name
+  source                = "../../modules/networking"
+  region                = var.region
+  vpc_cidr              = var.vpc_cidr
+  vpc_name              = var.vpc_name
   private_subnet_1_cidr = var.private_subnet_1_cidr
   private_subnet_1_name = var.private_subnet_1_name
-  public_subnet_1_cidr = var.public_subnet_1_cidr
-  public_subnet_1_name = var.public_subnet_1_name
-  igw_name = var.igw_name
-  public_rt_name = var.public_rt_name
-  availability_zone = var.availability_zone
-  environment = var.environment
+  public_subnet_1_cidr  = var.public_subnet_1_cidr
+  public_subnet_1_name  = var.public_subnet_1_name
+  igw_name              = var.igw_name
+  public_rt_name        = var.public_rt_name
+  availability_zone     = var.availability_zone
+  environment           = var.environment
 }
 
 /*

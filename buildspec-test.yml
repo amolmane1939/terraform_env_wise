@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "=== SYSTEM INFO ==="
+      - whoami
+      - pwd
+      - ls -la
+      - echo "=== ENVIRONMENT VARIABLES ==="
+      - env
+      - echo "=== AWS CLI TEST ==="
+      - aws sts get-caller-identity
+      - echo "=== INSTALL TERRAFORM ==="
+      - curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+      - apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+      - apt-get update && apt-get install terraform
+      - terraform --version
+
+  build:
+    commands:
+      - echo "=== DIRECTORY STRUCTURE ==="
+      - find . -type f -name "*.tf" | head -10
+      - echo "=== TEST TERRAFORM ==="
+      - terraform fmt -check -recursive || echo "Format check failed"
+      - echo "Build test completed"

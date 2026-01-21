@@ -1,30 +1,30 @@
 variable "sg_name" {
-    type = string
+  type = string
 }
 variable "sg_desc" {
-    type = string
+  type = string
 }
 variable "sg_cidr_blocks" {
-    type = list(string)
+  type = list(string)
 }
 variable "ami_id" {
-    type = string
+  type = string
 }
 variable "instance_type" {
-    type = string
+  type = string
 }
 variable "key_name" {
-    type = string
+  type = string
 }
 variable "disk_size" {
-    type = number
+  type = number
 }
 variable "instance_name" {
-    type = string
+  type = string
 }
 variable "vpc_id" {
-    type = string
+  type = string
 }
 variable "subnet_id" {
-    type = string
+  type = string
 }

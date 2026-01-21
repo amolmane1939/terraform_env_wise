@@ -1,43 +1,43 @@
 variable "region" {
   description = "The region to deploy to"
-  type = string
+  type        = string
 }
 variable "vpc_cidr" {
-    type = string
+  type = string
 }
 
 variable "vpc_name" {
   description = "The name of the VPC"
-  type = string
+  type        = string
 }
 
 variable "private_subnet_1_cidr" {
-    type = string
+  type = string
 }
 variable "private_subnet_1_name" {
-    type = string
+  type = string
 }
 
 variable "public_subnet_1_cidr" {
-    type = string
+  type = string
 }
 
 variable "public_subnet_1_name" {
-     type = string
+  type = string
 }
 
 variable "igw_name" {
-    type = string
+  type = string
 }
 
 variable "environment" {
-    type = string
+  type = string
 }
 
 variable "availability_zone" {
-    type = list(string)
+  type = list(string)
 }
 
 variable "public_rt_name" {
-    type = string
+  type = string
 }
