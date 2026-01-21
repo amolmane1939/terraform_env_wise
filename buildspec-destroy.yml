@@ -17,9 +17,11 @@ phases:
 
   pre_build:
     commands:
-      - echo "Starting Terraform destroy for environment: $TF_VAR_environment"
-      - echo "AWS Region: $AWS_DEFAULT_REGION"
-      - echo "WARNING: This will destroy infrastructure!"
+      - echo "Starting Terraform destroy for environment:"
+      - echo $TF_VAR_environment
+      - echo "AWS Region:"
+      - echo $AWS_DEFAULT_REGION
+      - echo "WARNING This will destroy infrastructure!"
       - cd environments/$TF_VAR_environment
 
   build:
