@@ -5,13 +5,14 @@ phases:
     runtime-versions:
       python: 3.9
     commands:
-      - echo "Installing Terraform..."
+      - echo "Installing Terraform via direct download..."
       - apt-get update
-      - apt-get install -y wget unzip curl gnupg software-properties-common
-      - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
-      - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-      - apt-get update
-      - apt-get install -y terraform
+      - apt-get install -y wget unzip
+      - TERRAFORM_VERSION="1.6.6"
+      - wget "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+      - unzip "terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+      - chmod +x terraform
+      - mv terraform /usr/local/bin/
       - terraform --version
       - echo "Installing additional tools..."
       - apt-get install -y jq
@@ -42,15 +43,15 @@ phases:
       - cd ../..
       - echo "=== TERRAFORM VALIDATION - STAGE ==="
       - cd environments/stage
-      - terraform init -backend=false
+      - terraform init -backend=false -input=false
       - terraform validate
-      - terraform plan -var-file=terraform.tfvars
+      - terraform plan -var-file=terraform.tfvars -input=false
       - cd ../..
       - echo "=== TERRAFORM VALIDATION - PROD ==="
       - cd environments/prod
-      - terraform init -backend=false
+      - terraform init -backend=false -input=false
       - terraform validate
-      - terraform plan -var-file=terraform.tfvars
+      - terraform plan -var-file=terraform.tfvars -input=false
       - cd ../..
 
   post_build:

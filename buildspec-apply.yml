@@ -6,9 +6,12 @@ phases:
       python: 3.9
     commands:
       - echo "Installing Terraform..."
-      - wget https://releases.hashicorp.com/terraform/1.6.0/terraform_1.6.0_linux_amd64.zip
-      - unzip terraform_1.6.0_linux_amd64.zip
-      - mv terraform /usr/local/bin/
+      - apt-get update
+      - apt-get install -y wget unzip curl gnupg software-properties-common
+      - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+      - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+      - apt-get update
+      - apt-get install -y terraform
       - terraform --version
 
   pre_build:
