@@ -5,13 +5,15 @@ phases:
     runtime-versions:
       python: 3.9
     commands:
-      - echo "Installing Terraform..."
+      - echo "Installing Terraform via direct download..."
       - apt-get update
-      - apt-get install -y wget unzip curl gnupg software-properties-common
-      - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
-      - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-      - apt-get update
-      - apt-get install -y terraform
+      - apt-get install -y wget unzip
+      - apt-get install -y gnupg software-properties-common
+      - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+      - gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+      - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+      - sudo apt update
+      - sudo apt-get install terraform
       - terraform --version
       - echo "Installing additional tools..."
       - apt-get install -y jq
@@ -36,21 +38,21 @@ phases:
       - echo "✅ Terraform formatting completed"
       - echo "=== TERRAFORM VALIDATION - DEV ==="
       - cd environments/dev
-      - terraform init -input=false
+      - terraform init 
       - terraform validate
-      - terraform plan -var-file=terraform.tfvars -input=false
+      - terraform plan -var-file=terraform.tfvars 
       - cd ../..
       - echo "=== TERRAFORM VALIDATION - STAGE ==="
       - cd environments/stage
-      - terraform init -input=false
+      - terraform init
       - terraform validate
-      - terraform plan -var-file=terraform.tfvars -input=false
+      - terraform plan -var-file=terraform.tfvars 
       - cd ../..
       - echo "=== TERRAFORM VALIDATION - PROD ==="
       - cd environments/prod
-      - terraform init -input=false
+      - terraform init
       - terraform validate
-      - terraform plan -var-file=terraform.tfvars -input=false
+      - terraform plan -var-file=terraform.tfvars
       - cd ../..
 
   post_build:
