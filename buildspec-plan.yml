@@ -17,8 +17,8 @@ phases:
 
   pre_build:
     commands:
-      - echo "Starting Terraform planning for environment: $TF_VAR_environment"
-      - echo "AWS Region: $AWS_DEFAULT_REGION"
+      - echo "Starting Terraform planning for environment:"
+      - echo "AWS Region:"
       - cd environments/$TF_VAR_environment
 
   build:
