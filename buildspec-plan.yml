@@ -39,7 +39,7 @@ phases:
 
 artifacts:
   files:
-    - environments/$TF_VAR_environment/tfplan
-    - environments/$TF_VAR_environment/plan-output.txt
-    - environments/$TF_VAR_environment/.terraform.lock.hcl
-  name: terraform-plan-$TF_VAR_environment
+    - 'environments/$TF_VAR_environment/tfplan'
+    - 'environments/$TF_VAR_environment/plan-output.txt'
+    - 'environments/$TF_VAR_environment/.terraform.lock.hcl'
+  name: 'terraform-plan-$TF_VAR_environment'
