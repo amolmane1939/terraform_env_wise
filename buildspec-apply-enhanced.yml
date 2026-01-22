@@ -1,0 +1,83 @@
+version: 0.2
+
+env:
+  variables:
+    TF_VAR_environment: "dev"  # Default environment
+    AWS_DEFAULT_REGION: "us-east-1"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing Terraform via HashiCorp repository..."
+      - apt-get update
+      - apt-get install -y wget unzip gnupg software-properties-common lsb-release
+      - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+      - gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+      - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com jammy main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+      - apt-get update
+      - apt-get install -y terraform
+      - terraform --version
+
+  pre_build:
+    commands:
+      - echo "Starting Terraform deployment for environment $TF_VAR_environment"
+      - echo "AWS Region $AWS_DEFAULT_REGION"
+      - echo "Current directory $(pwd)"
+      - ls -la
+      - cd environments/$TF_VAR_environment
+      - echo "Changed to environment directory $(pwd)"
+      - ls -la
+
+  build:
+    commands:
+      - echo "=== TERRAFORM INIT ==="
+      - terraform init -input=false
+      - echo "=== TERRAFORM FORMAT CHECK ==="
+      - terraform fmt -check -recursive
+      - echo "=== TERRAFORM VALIDATE ==="
+      - terraform validate
+      - echo "=== TERRAFORM PLAN ==="
+      - terraform plan -var-file=terraform.tfvars
+      - echo "=== TERRAFORM APPLY ==="
+      - terraform apply -var-file=terraform.tfvars -auto-approve
+      - APPLY_EXIT_CODE=$?
+      - echo "Apply exit code: $APPLY_EXIT_CODE"
+      - |
+        if [ $APPLY_EXIT_CODE -eq 0 ]; then
+          echo "APPLY_STATUS=SUCCESS" >> $CODEBUILD_SRC_DIR/apply-status.txt
+        else
+          echo "APPLY_STATUS=FAILED" >> $CODEBUILD_SRC_DIR/apply-status.txt
+          exit $APPLY_EXIT_CODE
+        fi
+      - echo "=== TERRAFORM OUTPUT ==="
+      - terraform output -json > terraform-outputs.json
+      - terraform output
+
+  post_build:
+    commands:
+      - echo "Terraform deployment completed for $TF_VAR_environment environment"
+      - echo "Infrastructure outputs:"
+      - |
+        if [ -f "terraform-outputs.json" ]; then
+          cat terraform-outputs.json
+        fi
+      - |
+        if [ -f "$CODEBUILD_SRC_DIR/apply-status.txt" ]; then
+          cat $CODEBUILD_SRC_DIR/apply-status.txt
+        fi
+      - echo "Deployment completed!"
+
+artifacts:
+  files:
+    - 'environments/$TF_VAR_environment/terraform-outputs.json'
+    - 'environments/$TF_VAR_environment/.terraform.lock.hcl'
+    - 'apply-status.txt'
+  name: 'terraform-apply-$TF_VAR_environment-$CODEBUILD_BUILD_NUMBER'
+
+reports:
+  terraform-report:
+    files:
+      - 'environments/$TF_VAR_environment/terraform-outputs.json'
+    file-format: 'JSON'

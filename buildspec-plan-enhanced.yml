@@ -1,0 +1,73 @@
+version: 0.2
+
+env:
+  variables:
+    TF_VAR_environment: "dev"  # Default environment
+    AWS_DEFAULT_REGION: "us-east-1"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing Terraform via HashiCorp repository..."
+      - apt-get update
+      - apt-get install -y wget unzip gnupg software-properties-common lsb-release
+      - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+      - gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+      - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com jammy main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+      - apt-get update
+      - apt-get install -y terraform
+      - terraform --version
+
+  pre_build:
+    commands:
+      - echo "Starting Terraform deployment for environment $TF_VAR_environment"
+      - echo "AWS Region $AWS_DEFAULT_REGION"
+      - echo "Current directory $(pwd)"
+      - ls -la
+      - cd environments/$TF_VAR_environment
+      - echo "Changed to environment directory $(pwd)"
+      - ls -la
+
+  build:
+    commands:
+      - echo "=== TERRAFORM INIT ==="
+      - terraform init -input=false
+      - echo "=== TERRAFORM FORMAT CHECK ==="
+      - terraform fmt -check -recursive
+      - echo "=== TERRAFORM VALIDATE ==="
+      - terraform validate
+      - echo "=== TERRAFORM PLAN ==="
+      - terraform plan -var-file=terraform.tfvars -out=tfplan -detailed-exitcode
+      - PLAN_EXIT_CODE=$?
+      - echo "Plan exit code: $PLAN_EXIT_CODE"
+      - echo "=== TERRAFORM SHOW PLAN ==="
+      - terraform show -no-color tfplan > plan-output.txt
+      - echo "Plan saved to plan-output.txt"
+      - |
+        if [ $PLAN_EXIT_CODE -eq 2 ]; then
+          echo "Changes detected in plan"
+          echo "CHANGES_DETECTED=true" >> $CODEBUILD_SRC_DIR/plan-status.txt
+        else
+          echo "No changes detected in plan"
+          echo "CHANGES_DETECTED=false" >> $CODEBUILD_SRC_DIR/plan-status.txt
+        fi
+
+  post_build:
+    commands:
+      - echo "Terraform planning completed for $TF_VAR_environment environment"
+      - echo "Plan summary:"
+      - grep -E "(Plan:|No changes)" plan-output.txt || echo "Plan details in artifacts"
+      - |
+        if [ -f "$CODEBUILD_SRC_DIR/plan-status.txt" ]; then
+          cat $CODEBUILD_SRC_DIR/plan-status.txt
+        fi
+
+artifacts:
+  files:
+    - 'environments/$TF_VAR_environment/tfplan'
+    - 'environments/$TF_VAR_environment/plan-output.txt'
+    - 'environments/$TF_VAR_environment/.terraform.lock.hcl'
+    - 'plan-status.txt'
+  name: 'terraform-plan-$TF_VAR_environment-$CODEBUILD_BUILD_NUMBER'
