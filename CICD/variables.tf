@@ -20,3 +20,8 @@ variable "project_name" {
   type        = string
   default     = "terraform-cicd"
 }
+
+variable "notification_email" {
+  description = "Email address for pipeline notifications"
+  type        = string
+}
