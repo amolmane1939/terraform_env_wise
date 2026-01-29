@@ -33,4 +33,3 @@ crash.*.log
 .terraformrc
 terraform.rc
 jenkinsfile
-.gitignore
